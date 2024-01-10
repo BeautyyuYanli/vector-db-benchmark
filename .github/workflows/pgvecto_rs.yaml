@@ -1,0 +1,66 @@
+name: Benchmark
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+
+jobs:
+  benchmark:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+          
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Start Server
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST_STABLE_VERSION=$(gh release list --repo tensorchord/pgvecto.rs --exclude-drafts --exclude-pre-releases --limit 1 | awk '{print $3}')
+          docker remove -f pgvecto-rs-demo || true
+          docker run --rm --name pgvecto-rs-demo -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=123456 -d tensorchord/pgvecto-rs:pg15-${LATEST_STABLE_VERSION}
+
+      - name: Cache Datasets
+        id: cache-datasets
+        uses: actions/cache@v3
+        with:
+          path: |
+            downloaded/laion-768-1m-ip
+          key: datasets
+
+      - name: Run Benchmark
+        run: poetry run python run.py --engines "*pgvector*"
+      
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results
+          if-no-files-found: error
