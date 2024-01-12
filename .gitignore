@@ -8,5 +8,4 @@ results/*.json
 code_workspace
 scripts/__pycache__
 experiments/test
-experiments/configurations
 venv/
