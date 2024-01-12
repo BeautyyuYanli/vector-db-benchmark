@@ -1,5 +1,5 @@
 sudo apt update 
-sudo apt install ca-certificates curl gnupg -y
+sudo apt install ca-certificates curl gnupg python3 -y
 # Add github cli repo
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
 sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
@@ -14,4 +14,6 @@ echo \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 # Install gh and docker
 sudo apt update 
-sudo apt install gh docker.io -y
+sudo apt install gh docker.io python-is-python3 -y
+# Install poetry
+curl -sSL https://install.python-poetry.org | python3 -
