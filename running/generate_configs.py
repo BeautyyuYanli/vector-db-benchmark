@@ -1,6 +1,8 @@
 from msgspec import Struct, field, to_builtins
 from typing import (
     List,
+    Dict,
+    Tuple
 )
 import itertools
 import json
@@ -49,38 +51,29 @@ class EngineParam(Struct, kw_only=True):
 
 SEARCH_PARALLEL = [16]
 SEARCH_TOP = [10]
-SEARCH_PARAMS = [
-    {"vectors.hnsw_ef_search": 8},
-    {"vectors.hnsw_ef_search": 16},
-    {"vectors.hnsw_ef_search": 32},
-    {"vectors.hnsw_ef_search": 64},
-    {"vectors.hnsw_ef_search": 128},
-    {"vectors.hnsw_ef_search": 256},
-    {"vectors.hnsw_ef_search": 512},
-]
-INDEX_PARAMS = [
-    (
-        "hnsw",
-        { "indexing": { "hnsw": { }  } }
-    ),
-    # (
-    #     "flat",
-    #     { "indexing": {"flat": {}}  }
-    # ),
-    # (
-    #     "ivf",
-    #     { "indexing": {"ivf": {}}  }
-    # )
-]
+PARAMS: Dict[str, Tuple[dict, List[dict]]] = {
+    "hnsw": (
+        { "indexing": { "hnsw": { }  } },
+        [
+            {"vectors.hnsw_ef_search": 8},
+            {"vectors.hnsw_ef_search": 16},
+            {"vectors.hnsw_ef_search": 32},
+            {"vectors.hnsw_ef_search": 64},
+            {"vectors.hnsw_ef_search": 128},
+            {"vectors.hnsw_ef_search": 256},
+            {"vectors.hnsw_ef_search": 512},
+        ]
+    )
+}
 
 
 def generate(version: str):
     return [
         EngineParam(
-            name=f"pgvecto.rs-{version}-{index_params[0]}",
-            remark=f"pgvecto.rs-{version}-{index_params[0]}",
+            name=f"pgvecto.rs-{version}-{index_type}",
+            remark=f"pgvecto.rs-{version}-{index_type}",
             engine="pgvector",
-            index_type=index_params[0],
+            index_type=index_type,
             version=version,
             search_params=[
                 SearchParam(
@@ -89,15 +82,15 @@ def generate(version: str):
                     params=search_params,
                 )
                 for search_parallel, search_top, search_params in itertools.product(
-                    SEARCH_PARALLEL, SEARCH_TOP, SEARCH_PARAMS
+                    SEARCH_PARALLEL, SEARCH_TOP, search_params_list
                 )
             ],
             upload_params=UploadParam(
-                index_params=index_params[1],
-                index_type=index_params[0],
+                index_params=index_params,
+                index_type=index_type,
             ),
         )
-        for index_params in INDEX_PARAMS
+        for index_type, (index_params, search_params_list) in PARAMS.items()
     ]
 
 
