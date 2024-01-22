@@ -39,7 +39,7 @@ for file_path in walk_result_file_paths(root_path="results"):
             f"{each_json['meta']['time_stamp']}"
         ),
         # meta info
-        "engine": each_json["meta"]["engine"]["name"],
+        "engine": each_json["meta"]["engine"]["remark"],
         "version": each_json["meta"]["engine"]["version"],
         "remark": each_json["meta"]["engine"]["other"],
         "index_type": each_json["meta"]["index_type"],

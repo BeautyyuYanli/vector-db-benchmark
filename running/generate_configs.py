@@ -38,7 +38,7 @@ class EngineParam(Struct, kw_only=True):
     version: str
     branch: str = "unknown"
     commit: str = "unknown"
-    remark: str = "none"
+    remark: str
     other: str = "none"
     link: str = "https://github.com/tensorchord/pgvecto.rs"
     connection_params: ConnectionParam = field(default_factory=ConnectionParam)
@@ -61,21 +61,16 @@ SEARCH_PARAMS = [
 INDEX_PARAMS = [
     (
         "hnsw",
-        {
-            "indexing": {
-                "hnsw": {
-                    "m": 12,
-                    "ef_construction": 100,
-                }
-            },
-        },
+        { "indexing": { "hnsw": { }  } }
     ),
     (
         "flat",
-        {
-            "indexing": {"flat": {}},
-        },
+        { "indexing": {"flat": {}}  }
     ),
+    (
+        "ivf",
+        { "indexing": {"ivf": {}}  }
+    )
 ]
 
 
@@ -83,6 +78,7 @@ def generate(version: str):
     return [
         EngineParam(
             name=f"pgvecto.rs-{version}-{index_params[0]}",
+            remark=f"pgvecto.rs-{version}-{index_params[0]}",
             engine="pgvector",
             index_type=index_params[0],
             version=version,
