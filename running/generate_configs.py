@@ -63,14 +63,14 @@ INDEX_PARAMS = [
         "hnsw",
         { "indexing": { "hnsw": { }  } }
     ),
-    (
-        "flat",
-        { "indexing": {"flat": {}}  }
-    ),
-    (
-        "ivf",
-        { "indexing": {"ivf": {}}  }
-    )
+    # (
+    #     "flat",
+    #     { "indexing": {"flat": {}}  }
+    # ),
+    # (
+    #     "ivf",
+    #     { "indexing": {"ivf": {}}  }
+    # )
 ]
 
 
